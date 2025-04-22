@@ -5,13 +5,14 @@ function linear_erp(start, end, t)
     return start + t * (end - start);
 }
 
-DRAWINGS = [];
+var DRAWINGS = {};
+var DRAW_ORDER = [];
 
 const NO_LOOP = 0;
 const CYCLE = 1;
 const LOOP = 2;
 
-function register_draw(draw_func, start_pos, end_pos, start_delay_frames, length, time_mod=(x) => {return x}, repeat=NO_LOOP)
+function register_draw(draw_id, draw_func, start_pos, end_pos, start_delay_frames, length, time_mod=(x) => {return x}, repeat=NO_LOOP)
 {
     /*
         Paramteres:
@@ -23,7 +24,8 @@ function register_draw(draw_func, start_pos, end_pos, start_delay_frames, length
             - time_mod: the mod function for the time scale (easing functions)
             - repeat: if it should repeat. CYCLE = 0 -> 1 -> 0 -> 1. LOOP = 0 -> 1, 0 -> 1. null for no repeat
     */
-    DRAWINGS.push({
+
+    DRAWINGS[draw_id] = {
         draw_func:   draw_func,
         start_pos:   start_pos,
         end_pos:     end_pos,
@@ -31,11 +33,24 @@ function register_draw(draw_func, start_pos, end_pos, start_delay_frames, length
         end_frame:   frameCount + +start_delay_frames + length,
         time_mod:    time_mod,
         repeat: repeat,
-    });
+    };
+    DRAW_ORDER.push(draw_id);
 }
 
-function drawShape(drawData)
+function getCurrentPercentOfDrawing(draw_id)
 {
+    return ( frameCount - DRAWINGS[draw_id].start_frame ) / ( DRAWINGS[draw_id].end_frame - DRAWINGS[draw_id].start_frame );
+}
+
+function getLengthOfDrawing(draw_id)
+{
+    return DRAWINGS[draw_id].end_frame - DRAWINGS[draw_id].start_frame;
+}
+
+function drawShape(draw_id)
+{
+    let drawData = DRAWINGS[draw_id];
+
     let cur_percent = ( frameCount - drawData.start_frame ) / ( drawData.end_frame - drawData.start_frame );
     if (cur_percent >= 1)
     {
@@ -76,6 +91,6 @@ function drawShape(drawData)
 
 function drawAllShapes()
 {
-    for (let drawData of DRAWINGS)
-        drawShape(drawData);
+    for (let id of DRAW_ORDER)
+        drawShape(id);
 }

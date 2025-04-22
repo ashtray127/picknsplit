@@ -18,3 +18,12 @@ function checkInCircle(x, y, r, center_pos)
 {
     return ((x - center_pos[0])^2 + (y - center_pos[1])^2) < r^2
 }
+
+function checkIfMouseOverCircle()
+{
+    let checks = [false, false];
+    if (checkInCircle(mouseX, mouseY, 50, LEFT_CIRCLE_POS))
+        checks[0] = true;
+    if (checkInCircle(mouseX, mouseY, 50, RIGHT_CIRCLE_POS))
+        checks[1] = true;
+}
