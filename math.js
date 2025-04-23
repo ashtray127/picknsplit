@@ -16,8 +16,7 @@ function findPointsOnACircle(r, center_pos, num_segments, angle=0)
 
 function checkInCircle(x, y, r, center_pos)
 {
-    return (
-        (x-center_pos[0])**2 + (y-center_pos[1])**2) <= r**2;
+    return ((x-center_pos[0])**2 + (y-center_pos[1])**2) <= r**2;
 }
 
 function checkIfMouseOverCircle()
