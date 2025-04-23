@@ -40,7 +40,7 @@ register_draw(
     LOOP
 )
 
-
+// TODO: make selection animation thingy (check notepad)
 
 function draw() {
     clear();
