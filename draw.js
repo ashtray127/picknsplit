@@ -8,7 +8,7 @@ function drawLeftSpinningCircleCircle(x, y, p)
     )
 
     let points_to_draw = findPointsOnACircle(
-        CIRCLE_R,
+        Consts.CIRCLE_R,
         [x, y],
         17,
         p * 11
@@ -29,7 +29,7 @@ function drawRightSpinningCircleCircle(x, y, p)
     )
 
     let points_to_draw = findPointsOnACircle(
-        CIRCLE_R,
+        Consts.CIRCLE_R,
         [x, y],
         17,
         p * 11

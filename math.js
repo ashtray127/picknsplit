@@ -22,9 +22,9 @@ function checkInCircle(x, y, r, center_pos)
 function checkIfMouseOverCircle()
 {
     let checks = [false, false];
-    if (checkInCircle(mouseX, mouseY, CIRCLE_R, LEFT_CIRCLE_POS))
+    if (checkInCircle(mouseX, mouseY, Consts.CIRCLE_R, Consts.LEFT_CIRCLE_POS))
         checks[0] = true;
-    if (checkInCircle(mouseX, mouseY, CIRCLE_R, RIGHT_CIRCLE_POS))
+    if (checkInCircle(mouseX, mouseY, Consts.CIRCLE_R, Consts.RIGHT_CIRCLE_POS))
         checks[1] = true;
     return checks;
 }

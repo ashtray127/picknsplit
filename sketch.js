@@ -1,8 +1,4 @@
-var canvas_size = [400, 400];
-let center_pos = [canvas_size[0] / 2, canvas_size[1] / 2];
 
-const LEFT_CIRCLE_POS = [100, 200];
-const RIGHT_CIRCLE_POS = [300, 200];
 
 register_var("LEFT_CIRCLE_COLOR_r", 0);
 register_var("LEFT_CIRCLE_COLOR_g", 0);
@@ -16,14 +12,17 @@ register_var("LEFT_CIRCLE_SPEED",SLOW_ANIM_LENGTH);
 register_var("RIGHT_CIRCLE_SPEED",SLOW_ANIM_LENGTH)
 
 function setup() {
-  createCanvas(...canvas_size);
+  createCanvas(...Consts.canvas_size);
+}
+function windowResized() {
+    resizeCanvas(...Consts.canvas_size)
 }
 
 register_draw(
     "left_circle",
     drawLeftSpinningCircleCircle,
-    LEFT_CIRCLE_POS,
-    LEFT_CIRCLE_POS,
+    Consts.LEFT_CIRCLE_POS,
+    Consts.LEFT_CIRCLE_POS,
     0,
     get_variable("LEFT_CIRCLE_SPEED"),
     no_mod,
@@ -32,8 +31,8 @@ register_draw(
 register_draw(
     "right_circle",
     drawRightSpinningCircleCircle,
-    RIGHT_CIRCLE_POS,
-    RIGHT_CIRCLE_POS,
+    Consts.RIGHT_CIRCLE_POS,
+    Consts.RIGHT_CIRCLE_POS,
     0,
     get_variable("RIGHT_CIRCLE_SPEED"),
     no_mod,
