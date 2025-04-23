@@ -16,14 +16,23 @@ function findPointsOnACircle(r, center_pos, num_segments, angle=0)
 
 function checkInCircle(x, y, r, center_pos)
 {
-    return ((x - center_pos[0])^2 + (y - center_pos[1])^2) < r^2
+    return (
+        (x-center_pos[0])**2 + (y-center_pos[1])**2) <= r**2;
 }
 
 function checkIfMouseOverCircle()
 {
     let checks = [false, false];
-    if (checkInCircle(mouseX, mouseY, 50, LEFT_CIRCLE_POS))
+    if (checkInCircle(mouseX, mouseY, CIRCLE_R, LEFT_CIRCLE_POS))
         checks[0] = true;
-    if (checkInCircle(mouseX, mouseY, 50, RIGHT_CIRCLE_POS))
+    if (checkInCircle(mouseX, mouseY, CIRCLE_R, RIGHT_CIRCLE_POS))
         checks[1] = true;
+    return checks;
+}
+
+function getFrameTimesFromPercent(cur_percent, new_length)
+{
+    let new_start_frame = frameCount - ( cur_percent * new_length);
+    let new_end_frame = frameCount + (new_length - ( cur_percent * new_length ) );
+    return [new_start_frame, new_end_frame]
 }

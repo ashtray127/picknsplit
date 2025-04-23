@@ -94,3 +94,64 @@ function drawAllShapes()
     for (let id of DRAW_ORDER)
         drawShape(id);
 }
+
+
+// ----------------------------------------
+
+VARIABLE_ANIMS = []
+STORED_VARIABLES = {}
+
+function register_var(var_name, inital_value){
+    STORED_VARIABLES[var_name] = inital_value;
+}
+
+function get_variable(var_name){
+    return STORED_VARIABLES[var_name];
+}
+
+function set_variable(var_name, value)
+{
+    STORED_VARIABLES[var_name] = value;
+}
+
+function animate_var(var_name, end_value, length, time_mod=no_mod, starting_percent=0)
+{
+    for (let anim of VARIABLE_ANIMS)
+        if (anim.var == var_name)
+        {
+            delete anim;
+        }
+
+    let frame_times = getFrameTimesFromPercent(starting_percent, length);
+
+    VARIABLE_ANIMS.push({
+        var: var_name,
+        start_value: get_variable(var_name),
+        end_value: end_value,
+        start_frame: frame_times[0],
+        end_frame:   frame_times[1],
+        time_mod: time_mod
+    })
+}
+
+function update_all_variables()
+{
+    for (let anim of VARIABLE_ANIMS)
+    {
+        let raw_percent = ( frameCount - anim.start_frame ) / ( anim.end_frame - frameCount );
+
+        if (raw_percent <= 0)
+            continue;
+        if (raw_percent >= 1)
+        {
+            set_variable(anim.var, anim.end_value);
+            delete anim;
+            continue;
+        }
+
+        let mod_percent = anim.time_mod(raw_percent);
+        let current_value = linear_erp(anim.start_value, anim.end_value, mod_percent);
+        set_variable(anim.var, current_value);
+    }
+}
+

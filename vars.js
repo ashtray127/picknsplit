@@ -1,0 +1,4 @@
+const CIRCLE_R = 50;
+
+const SLOW_ANIM_LENGTH = 1000;
+const FAST_ANIM_LENGTH = 150;
