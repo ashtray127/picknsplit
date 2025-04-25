@@ -1,3 +1,12 @@
+// Easing constants
+const e_c1 = 1.70158;
+const e_c2 = e_c1 * 1.525;
+const e_c3 = e_c1 + 1;
+const e_c4 = (2 * Math.PI) / 3;
+const e_c5 = (2 * Math.PI) / 4.5;
+const e_n1 = 7.5625;
+const e_d1 = 2.75;
+
 var frameCount = 0;
 
 function linear_erp(start, end, t)
@@ -5,153 +14,194 @@ function linear_erp(start, end, t)
     return start + t * (end - start);
 }
 
-var DRAWINGS = {};
-var DRAW_ORDER = [];
+class TimeMods {
 
-const NO_LOOP = 0;
-const CYCLE = 1;
-const LOOP = 2;
+    static linear(x){ return x }
 
-function register_draw(draw_id, draw_func, start_pos, end_pos, start_delay_frames, length, time_mod=(x) => {return x}, repeat=NO_LOOP)
-{
-    /*
-        Paramteres:
-            - draw_func: the function that takes a current x, y, and p (percent animation) parameters to draw said object
-            - start_pos: vector2 of start position
-            - end_pos:  vector2 of end possition,
-            - start_delay_frames: the amount of frames in the future to start the animation
-            - length: how many frames the animation should be
-            - time_mod: the mod function for the time scale (easing functions)
-            - repeat: if it should repeat. CYCLE = 0 -> 1 -> 0 -> 1. LOOP = 0 -> 1, 0 -> 1. null for no repeat
-    */
+    static ease_in_sine(x){ return 1 - Math.cos((x * Math.PI) / 2); }
+    static ease_out_sine(x){ return Math.sin((x * Math.PI) / 2); }
+    static ease_in_out_sine(x){ return -(Math.cos(Math.PI * x) - 1) / 2; }
 
-    DRAWINGS[draw_id] = {
-        draw_func:   draw_func,
-        start_pos:   start_pos,
-        end_pos:     end_pos,
-        start_frame: frameCount + start_delay_frames,
-        end_frame:   frameCount + +start_delay_frames + length,
-        time_mod:    time_mod,
-        repeat: repeat,
-    };
-    DRAW_ORDER.push(draw_id);
+    static ease_in_quad(x){ return x * x; }
+    static ease_out_quad(x){ return 1 - (1 - x) * (1 - x); }
+    static ease_in_out_quad(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+    static ease_in_cubic(x){ return x * x * x; }
+    static ease_out_cubic(x) { return 1 - Math.pow(1 - x, 3); }
+    static ease_in_out_cubic(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+
+    static ease_in_quart(x){ return x * x * x * x; }
+    static ease_out_quart(x){ return 1 - Math.pow(1 - x, 4); }
+    static ease_in_out_quart(x){ return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2; }
+
+    static ease_in_quint(x){ return x * x * x * x * x; }
+    static ease_out_quint(x){ return 1 - Math.pow(1 - x, 5); }
+    static ease_in_out_quint(x){ return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2; }
+
+    static ease_in_expo(x){ return x === 0 ? 0 : Math.pow(2, 10 * x - 10); }
+    static ease_out_expo(x){ return x === 1 ? 1 : 1 - Math.pow(2, -10 * x); }
+    static ease_in_out_expo(x){ return x === 0? 0 : x === 1? 1 : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2; }
+
+    static ease_in_circ(x){ return 1 - Math.sqrt(1 - Math.pow(x, 2)); }
+    static ease_out_circ(x){ return Math.sqrt(1 - Math.pow(x - 1, 2)); }
+    static ease_in_out_circ(x){ return x < 0.5? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;}
+
+    static ease_in_back(x){ return e_c3 * x * x * x - e_c1 * x * x; }
+    static ease_out_back(x){ return 1 + e_c3 * Math.pow(x - 1, 3) + e_c1 * Math.pow(x - 1, 2); }
+    static ease_in_out_back(x){ return x < 0.5? (Math.pow(2 * x, 2) * ((e_c2 + 1) * 2 * x - e_c2)) / 2 : (Math.pow(2 * x - 2, 2) * ((e_c2 + 1) * (x * 2 - 2) + e_c2) + 2) / 2; }
+
+    static ease_in_elastic(x){ return x === 0? 0 : x === 1? 1 : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * e_c4);}
+    static ease_out_elastic(x){ return x === 0? 0 : x === 1? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * e_c4) + 1;}
+    static ease_in_out_elastic(x){ return x === 0? 0 : x === 1? 1 : x < 0.5? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * e_c5)) / 2 : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * e_c5)) / 2 + 1;}
+    
+    static ease_in_bounce(x){ if (x < 1 / e_d1) { return e_n1 * x * x; } else if (x < 2 / e_d1) { return e_n1 * (x -= 1.5 / e_d1) * x + 0.75; } else if (x < 2.5 / e_d1) { return e_n1 * (x -= 2.25 / e_d1) * x + 0.9375; } else { return e_n1 * (x -= 2.625 / e_d1) * x + 0.984375; }}
+    static ease_out_bounce(x){ return 1 - TimeMods.easeOutBounce(1 - x); }
+    static ease_in_out_bounce(x){ return x < 0.5? (1 - TimeMods.easeOutBounce(1 - 2 * x)) / 2 : (1 + TimeMods.easeOutBounce(2 * x - 1)) / 2; }
+
+};
+
+class Loops {
+    static get NONE()  { return "NONE";  }
+    static get CYCLE() { return "CYCLE"; }
+    static get LOOP()  { return "LOOP";  }
 }
 
-function getCurrentPercentOfDrawing(draw_id)
-{
-    return ( frameCount - DRAWINGS[draw_id].start_frame ) / ( DRAWINGS[draw_id].end_frame - DRAWINGS[draw_id].start_frame );
-}
+var _VARIABLES = {};
 
-function getLengthOfDrawing(draw_id)
+function create_variable(var_name, value)
 {
-    return DRAWINGS[draw_id].end_frame - DRAWINGS[draw_id].start_frame;
-}
-
-function drawShape(draw_id)
-{
-    let drawData = DRAWINGS[draw_id];
-
-    let cur_percent = ( frameCount - drawData.start_frame ) / ( drawData.end_frame - drawData.start_frame );
-    if (cur_percent >= 1)
-    {
-        if (drawData.repeat == LOOP)
-        {
-            let draw_length = drawData.end_frame - drawData.start_frame;
-            drawData.start_frame = frameCount;
-            drawData.end_frame = frameCount + draw_length;
-            cur_percent = 0; 
-        }
-        if (drawData.repeat == CYCLE)
-        {
-            let new_startpos = drawData.end_pos.slice()   // COPY
-            let new_endpos   = drawData.start_pos.slice() // COPY
-            drawData.start_pos = new_startpos;
-            drawData.end_pos   = new_endpos;
-            let draw_length = drawData.end_frame - drawData.start_frame;
-            drawData.start_frame = frameCount;
-            drawData.end_frame = frameCount + draw_length;
-            drawData.draw_func(...drawData.start_pos, 0);
-            return;
-        }
-        drawData.draw_func(...drawData.end_pos, 1);
-        return;
+    _VARIABLES[var_name] = {
+        id: var_name,
+        value: value,
+        anim: null
     }
-    if (cur_percent <= 0)
-    {
-        drawData.draw_func(...drawData.start_pos, 0);
-        return;
-    }
-
-    let mod_percent = drawData.time_mod(cur_percent);
-    let offset_x = linear_erp(drawData.start_pos[0], drawData.end_pos[0], mod_percent);
-    let offset_y = linear_erp(drawData.start_pos[1], drawData.end_pos[1], mod_percent);
-    drawData.draw_func(offset_x, offset_y, cur_percent);
-}
-
-
-function drawAllShapes()
-{
-    for (let id of DRAW_ORDER)
-        drawShape(id);
-}
-
-
-// ----------------------------------------
-
-VARIABLE_ANIMS = []
-STORED_VARIABLES = {}
-
-function register_var(var_name, inital_value){
-    STORED_VARIABLES[var_name] = inital_value;
-}
-
-function get_variable(var_name){
-    return STORED_VARIABLES[var_name];
+    return true
 }
 
 function set_variable(var_name, value)
 {
-    STORED_VARIABLES[var_name] = value;
+    if (!Object.keys(_VARIABLES).includes(var_name))
+        return false;
+    if (!Object.is(_VARIABLES[var_name].anim, null))
+        return false;
+
+    _VARIABLES[var_name].value = value;
+    return true;
 }
 
-function animate_var(var_name, end_value, length, time_mod=no_mod, starting_percent=0)
+// ------------ GET ----------------
+function get_variable(var_name)
 {
-    for (let anim of VARIABLE_ANIMS)
-        if (anim.var == var_name)
-        {
-            delete anim;
-        }
-
-    let frame_times = getFrameTimesFromPercent(starting_percent, length);
-
-    VARIABLE_ANIMS.push({
-        var: var_name,
-        start_value: get_variable(var_name),
-        end_value: end_value,
-        start_frame: frame_times[0],
-        end_frame:   frame_times[1],
-        time_mod: time_mod
-    })
+    if (!Object.keys(_VARIABLES).includes(var_name))
+        return undefined;
+    return _VARIABLES[var_name].value;
 }
 
-function update_all_variables()
+function get_percent_of_animation(var_name)
 {
-    for (let anim of VARIABLE_ANIMS)
+    if (!Object.keys(_VARIABLES).includes(var_name))
+        return undefined;
+    let var_data = _VARIABLES[var_name]
+    if (Object.is(var_data.anim, null))
+        return undefined;
+    let raw_percent = ( frameCount - var_data.anim.start_frame ) / ( var_data.anim.end_frame - var_data.anim_start_frame );
+    return var_data.anim.time_mod(raw_percent);
+}
+
+function get_raw_percent_of_animation(var_name)
+{
+    if (!Object.keys(_VARIABLES).includes(var_name))
+        return undefined;
+    let var_data = _VARIABLES[var_name];
+    if (Object.is(var_data.anim, null))
+        return undefined;
+    return ( frameCount - var_data.anim.start_frame ) / ( var_data.anim.end_frame - var_data.anim.start_frame );
+}
+
+function get_length_of_animation(var_name)
+{
+    if (!Object.keys(_VARIABLES).includes(var_name))
+        return undefined;
+    let var_data = _VARIABLES[var_name];
+    if (Object.is(var_data.anim, null))
+        return undefined;
+    return var_data.anim.end_frame - var_data.anim.start_frame;
+}
+
+function is_animated(var_name)
+{
+    if (!Object.keys(_VARIABLES).includes(var_name))
+        return undefined;
+    return !Object.is(_VARIABLES[var_name].anim, null);
+}
+
+// --------- ANIMATE -----------------
+var cached_percent = 0;
+
+function animate_var(var_name, start_value, end_value, frame_length, time_mod=TimeMods.no_mod, starting_percent=0, loop=Loops.NONE)
+{
+    if (!Object.keys(_VARIABLES).includes(var_name))
+        return false;
+
+    var_data = _VARIABLES[var_name]
+    frame_timings = getFrameTimesFromPercent(starting_percent, frame_length);
+    
+    var_data.anim = {
+        start_value: start_value,
+        end_value:   end_value,
+        start_frame: frame_timings[0],
+        end_frame:   frame_timings[1],
+        time_mod:    time_mod,
+        loop:        loop
+    };
+    return true;
+}
+
+function update_animated_variables()
+{
+    for (let var_data of Object.values(_VARIABLES))
     {
-        let raw_percent = ( frameCount - anim.start_frame ) / ( anim.end_frame - frameCount );
+        if (Object.is(var_data.anim, null))
+            continue;
+
+        let raw_percent = ( frameCount - var_data.anim.start_frame ) / ( var_data.anim.end_frame - var_data.anim.start_frame );
 
         if (raw_percent <= 0)
-            continue;
-        if (raw_percent >= 1)
         {
-            set_variable(anim.var, anim.end_value);
-            delete anim;
             continue;
         }
+        if (raw_percent >= 1)
+        {
+            switch (var_data.anim.loop) 
+            {
+                case Loops.NONE:
+                    var_data.value = var_data.anim.end_value;
+                    var_data.anim = null;
+                    continue;
+                case Loops.CYCLE:
+                    let length = var_data.anim.end_frame - var_data.anim.start_frame;
+                    let new_start_value = var_data.anim.end_value + 0;
+                    let new_end_value   = var_data.anim.start_value + 0;
 
-        let mod_percent = anim.time_mod(raw_percent);
-        let current_value = linear_erp(anim.start_value, anim.end_value, mod_percent);
-        set_variable(anim.var, current_value);
+                    var_data.anim.start_value   = new_start_value;
+                    var_data.anim.end_value     = new_end_value;
+                    var_data.anim.start_frame   = frameCount;
+                    var_data.anim.end_frame     = frameCount + length;
+                    raw_percent = 0;
+                    break;
+                case Loops.LOOP:
+                    let anim_length = var_data.anim.end_frame - var_data.anim.start_frame;
+                    var_data.anim.start_frame = frameCount;
+                    var_data.anim.end_frame   = frameCount + anim_length;
+                    raw_percent = 0;
+                    break;
+            };
+        }
+
+        let mod_percent = var_data.anim.time_mod(raw_percent);
+
+        let new_value = linear_erp(var_data.anim.start_value, var_data.anim.end_value, mod_percent);
+
+        var_data.value = new_value;
     }
 }
-
